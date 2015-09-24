@@ -12,17 +12,13 @@ rebuild _ (_, []) = []
 sowRight :: Int -> [Stone] -> Board -> Board
 sowRight position row = sow (position + 1) (row !! position)
 
-replace :: Int -> Stone -> Board -> Board
-replace position value board
-  | odd quotient = (fst board, rebuild value (splitAt offset (snd board)))
-  | otherwise    = (rebuild value (splitAt offset (fst board)), snd board)
-  where quotient = div position 7
-        offset = position - quotient * 7
+replace :: Int -> Stone -> [Stone] -> [Stone]
+replace position value row = rebuild value (splitAt position row)
 
 sow :: Int -> Stone -> Board -> Board
-sow position 1 board
-  | odd quotient = replace position (snd board !! offset + 1) board
-  | otherwise = replace position (fst board !! offset + 1) board
+sow position 1 (row1, row2)
+  | odd quotient = (row1, replace offset (row2 !! offset + 1) row2)
+  | otherwise = (replace offset (row1 !! offset + 1) row1, row2)
   where quotient = div position 7
         offset = position - quotient * 7
 sow position value board = sow (position + 1) (value - 1)
@@ -30,9 +26,8 @@ sow position value board = sow (position + 1) (value - 1)
   $ board
 
 play :: Board -> Int -> Either Board String
-play board position
-  | position < 0 || position >= length (fst board) = Right "Invalid Position"
+play (row1, row2) position
+  | position < 0 || position >= length row1 = Right "Invalid Position"
   | otherwise = Left
-    . sowRight position (fst board)
-    . replace position 0
-    $ board
+    . sowRight position row1
+    $ (replace position 0 row1, row2)

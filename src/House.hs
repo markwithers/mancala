@@ -28,6 +28,7 @@ sow position stones board = sow (position + 1) (stones - 1)
 play :: Board -> Int -> Either Board String
 play (playerBoard, opponentBoard) selectedHouse
   | selectedHouse < 0 || selectedHouse >= length playerBoard = Right "Invalid Move!"
+  | playerBoard !! selectedHouse == 0 = Right "Invalid Move!"
   | otherwise = Left
     . sowRight selectedHouse playerBoard
     $ (replace selectedHouse 0 playerBoard, opponentBoard)

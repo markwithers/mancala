@@ -2,6 +2,9 @@ module House (
   Board, play
 ) where
 
+tuple :: t -> t1 -> (t, t1)
+tuple f g = (f, g)
+
 type Stone = Int
 type Board = ([Stone], [Stone])
 
@@ -17,10 +20,12 @@ replace position stones board = place stones (splitAt position board)
 
 sow :: Int -> Stone -> Board -> Board
 sow position 1 (playerBoard, opponentBoard)
-  | odd quotient = (playerBoard, replace offset (opponentBoard !! offset + 1) opponentBoard)
-  | otherwise = (replace offset (playerBoard !! offset + 1) playerBoard, opponentBoard)
+  | odd quotient = playerBoard `tuple` inc opponentBoard
+  | otherwise = inc playerBoard `tuple` opponentBoard
   where quotient = div position 7
         offset = position - quotient * 7
+        inc board = replace offset (board !! offset + 1) board
+
 sow position stones board = sow (position + 1) (stones - 1)
   . sow position 1
   $ board
@@ -31,4 +36,4 @@ play (playerBoard, opponentBoard) selectedHouse
   | playerBoard !! selectedHouse == 0 = Right "Invalid Move!"
   | otherwise = Left
     . sowRight selectedHouse playerBoard
-    $ (replace selectedHouse 0 playerBoard, opponentBoard)
+    $ replace selectedHouse 0 playerBoard `tuple` opponentBoard
